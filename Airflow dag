@@ -1,0 +1,36 @@
+from airflow import DAG
+from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
+from airflow.utils.dates import days_ago
+
+# Define the default arguments for the DAG
+default_args = {
+    'owner': 'airflow',
+    'start_date': days_ago(1),
+    'retries': 1,
+}
+
+# Define the DAG
+dag = DAG(
+    'snowflake_example_dag',
+    default_args=default_args,
+    description='An example DAG to interact with Snowflake',
+    schedule_interval='@daily',
+)
+
+# Define the Snowflake SQL query
+snowflake_query = """
+SELECT CURRENT_DATE;
+"""
+
+# Define the Snowflake task
+snowflake_task = SnowflakeOperator(
+    task_id='run_snowflake_query',
+    sql=snowflake_query,
+    snowflake_conn_id='my_snowflake_conn_id',
+    dag=dag,
+)
+
+# Set the task dependencies (if any)
+# In this simple example, there are no dependencies
+
+# Save the DAG file (e.g., as snowflake_dag.py) in your Airflow DAGs directory
