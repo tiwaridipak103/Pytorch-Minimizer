@@ -1,76 +1,32 @@
-from airflow import DAG
-from airflow.providers.snowflake.operators.snowflake import SnowflakeOperator
-from airflow.utils.dates import days_ago
-
-# Define the default arguments for the DAG
-default_args = {
-    'owner': 'airflow',
-    'start_date': days_ago(1),
-    'retries': 1,
-}
-
-# Define the DAG
-dag = DAG(
-    'snowflake_example_dag',
-    default_args=default_args,
-    description='An example DAG to interact with Snowflake',
-    schedule_interval='@daily',
-)
-
-# Define the Snowflake SQL query
-snowflake_query = """
-SELECT CURRENT_DATE;
-"""
-
-# Define the Snowflake task
-snowflake_task = SnowflakeOperator(
-    task_id='run_snowflake_query',
-    sql=snowflake_query,
-    snowflake_conn_id='my_snowflake_conn_id',
-    dag=dag,
-)
-
-# Set the task dependencies (if any)
-# In this simple example, there are no dependencies
-
-# Save the DAG file (e.g., as snowflake_dag.py) in your Airflow DAGs directory
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-
-# Parameters for the standard normal distribution
-mu = 0  # Mean
-sigma = 1  # Standard deviation
-
-# Define the range of x values
-x = np.linspace(mu - 3*sigma, mu + 3*sigma, 100)
-
-# Calculate the y values for the standard normal distribution
-y = norm.pdf(x, mu, sigma)
-
-# Plotting the standard normal distribution
-plt.plot(x, y, label='Standard Normal Distribution')
-
-# Define the critical value for the rejection region (Z_crit)
-Z_crit = 1.96  # for a 95% confidence level (two-tailed test)
-
-# Shade the rejection region for a two-tailed test
-plt.fill_between(x, y, where=(x > Z_crit) | (x < -Z_crit), color='red', alpha=0.5, label='Rejection Region')
-
-# Adding Test Statistic
-Test_stat = 2.1  # Example test statistic
-plt.axvline(Test_stat, color='green', linestyle='dashed', linewidth=2, label=f'Test Statistic = {Test_stat:.2f}')
-
-# Adding Z-critical values
-plt.axvline(Z_crit, color='blue', linestyle='dashed', linewidth=1, label=f'Z-critical = {Z_crit:.2f}')
-plt.axvline(-Z_crit, color='blue', linestyle='dashed', linewidth=1)
-
-# Adding labels and title
-plt.xlabel('Z-value')
-plt.ylabel('Probability Density')
-plt.title('Gaussian Distribution with Rejection Region \n (A/B Testing for LunarTech CTA button)')
-plt.legend()
 
 # Show plot
 plt.show()
+def is_Practically_significant(delta, CI_95):
+    """
+    We assess if the difference between Control and Experimental group is practically significant using the Minimum Detectable Effect (MDE).
+    
+    Arguments:
+    delta (float): The Minimum Detectable Effect (MDE) considered for practical significance.
+    CI_95 (tuple): A tuple representing the lower and upper bounds of the 95% Confidence Interval.
+    
+    Returns:
+    bool: True if practically significant, False otherwise.
+    """
+    
+    # Extract lower bound of 95% Confidence Interval
+    Lower_bound_CI = CI_95[0]
+    
+    # Check if the lower bound of the CI is greater than or equal to delta
+    if Lower_bound_CI >= delta:
+        print(f"We have practical significance! \nWith MDE of {delta}, the difference between Control and Experimental group is practically significant.")
+        return True
+    else:
+        print("We don't have practical significance! \nThe difference between Control and Experimental group is not practically significant.")
+        return False
+
+# Example of using the function
+delta = 0.05  # Assuming a 5% increase is our MDE
+CI_95 = (0.04, 0.06)  # Example Confidence Interval
+
+# Call the function
+is_Practically_significant(delta, CI_95)
